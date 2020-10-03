@@ -290,7 +290,6 @@ app.post('/order/create', tokenVerify, (req, res) => {
         PRODUCTOS
     } = req.body;   
 
-
     const ESTADO = "NUEVO";
 
     //Obtener Hora actual
@@ -300,42 +299,17 @@ app.post('/order/create', tokenVerify, (req, res) => {
 
     const HOUR = hour + ":" + minutes;
 
-    const productID = Object.keys(PRODUCTOS)
-    let stringCondition, productsData;
-    let descriptionString = "";
+    const productos = JSON.stringify(PRODUCTOS);
 
-    productID.forEach( (condition, index) => {
-        //Verificar si la condicion no devuelve undefined
-        if (index === 0) {
-            stringCondition = " WHERE ID =" + condition;
-        } else {
-            stringCondition = stringCondition + " OR ID =" + condition;
-        };
-    });
-
-    connection.query("SELECT * FROM products" + stringCondition, (err, results, fields) => {
-        productsData = results;
-        
-        let productList =  {};
-
-        productsData.forEach( productListItems => {
-            productList[productListItems.ID] = productListItems.PRODUCT_NAME;
-        })
-       
-        productID.forEach( id => {
-            descriptionString +=  PRODUCTOS[id].QNT + "x " + productList[id] + " ";
-        })
-
-        connection.query(
-            "INSERT INTO pedidos (ESTADO, HORA, DESCRIPCION, PAGO, USUARIO, DIRECCION) VALUES ('"+ESTADO+"', '"+HOUR+"', '"+descriptionString+"', '"+PAGO+"', '"+req.USER_DATA.ID+"', '"+DIRECCION+"');",
-            function(err, results, fields) {
-                if(err) {
-                    console.log(err)
-                }
-                res.json(results);
+    connection.query(
+        "INSERT INTO pedidos (ESTADO, HORA, PRODUCTOS, PAGO, USUARIO, DIRECCION) VALUES ('"+ESTADO+"', '"+HOUR+"', '"+productos+"', '"+PAGO+"', '"+req.USER_DATA.ID+"', '"+DIRECCION+"');",
+        function(err, results, fields) {
+            if(err) {
+                console.log(err)
             }
-        );
-    });
+            res.json(results);
+        }
+    );
 });
 app.get('/order', tokenVerify, (req, res) => {
 
@@ -343,6 +317,8 @@ app.get('/order', tokenVerify, (req, res) => {
         ID,
         ROLE,
     } = req.USER_DATA;
+
+    res.orderList = {}
 
     let QUERY = 'SELECT * FROM `pedidos`';
     if (ROLE !== "ADMIN") {
@@ -352,9 +328,58 @@ app.get('/order', tokenVerify, (req, res) => {
     connection.query(
         QUERY,
         function(err, results, fields) {
-            res.json(results);
+            results.forEach( (result, _index) => {
+
+               let {
+                ID,
+                ESTADO,
+                HORA,
+                PRODUCTOS,
+                PAGO,
+                USUARIO,
+                DIRECCION
+               } = result
+
+               
+                const productID = Object.keys(JSON.parse(PRODUCTOS))
+                let stringCondition, productsData;
+                let descriptionString = "";
+                                
+                productID.forEach( (condition, index) => {
+                //Verificar si la condicion no devuelve undefined
+                    if (index === 0) {
+                        stringCondition = " WHERE ID =" + condition;
+                    } else {
+                        stringCondition = stringCondition + " OR ID =" + condition;
+                    };
+                });
+
+                connection.query("SELECT * FROM products" + stringCondition, (err, results, fields) => {
+                    productsData = results;
+                    let productList =  {};
+
+                    productsData.forEach( productListItems => {
+                        productList[productListItems.ID] = productListItems.PRODUCT_NAME;
+                    })
+       
+                    productID.forEach( id => {
+                        descriptionString +=  JSON.parse(PRODUCTOS)[id].QNT + "x " + productList[id] + " ";
+                    });
+                    res.orderList[_index] = {
+                        ID,
+                        ESTADO,
+                        HORA,
+                        PRODUCTOS : JSON.parse(PRODUCTOS),
+                        PAGO,
+                        USUARIO,
+                        DIRECCION,
+                        DESCRIPCION : descriptionString
+                    }
+                    res.json(res.orderList);
+                });    
+            });
         }
-    );
+    )
 })
 app.post('/order/edit', tokenVerify, isAdminUser, (req, res) => {
 
@@ -420,5 +445,23 @@ app.post('/order/edit', tokenVerify, isAdminUser, (req, res) => {
         }
     );
 });
+app.post('/order/delete', tokenVerify, (req, res) => {
+
+    const {
+        ID
+    } = req.body;
+    
+    let QUERY = 'DELETE FROM `pedidos` WHERE ID = ' + ID + ';';
+    connection.query(
+       QUERY,
+        function(err, results, fields) {
+            if(err) {
+                console.log(err);
+            }
+            res.json(results);
+        }
+    );
+});
+
 
 app.listen(4444, () => console.log('Server Running...'));
