@@ -377,9 +377,15 @@ app.get('/order', tokenVerify, (req, res) => {
                     }
                     res.json(res.orderList);
                 });    
-            });
+            } );
         }
-    )
+    );
+
+    
+
+
+
+
 })
 app.post('/order/edit', tokenVerify, isAdminUser, (req, res) => {
 
@@ -445,6 +451,7 @@ app.post('/order/edit', tokenVerify, isAdminUser, (req, res) => {
         }
     );
 });
+
 app.post('/order/delete', tokenVerify, (req, res) => {
 
     const {
@@ -462,6 +469,5 @@ app.post('/order/delete', tokenVerify, (req, res) => {
         }
     );
 });
-
 
 app.listen(4444, () => console.log('Server Running...'));
