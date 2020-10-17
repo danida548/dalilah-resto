@@ -10,6 +10,7 @@ Dominio del server -> localhost:4444
 
 //End points
 
+
 >> Agregar usuario
     // El role del user puede ser ADMIN | USER
 
@@ -174,6 +175,13 @@ Dominio del server -> localhost:4444
         "WHERE": {
 		    "ID" : "1"
 	    },
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MTQsIlVTRVJfTkFNRSI6IlVTRVJURVNUVFQiLCJFTUFJTCI6IlVTRVJURVNUQFVTRVJURVNULlVTRVJVU0VSVEVTVFRUVEVTVCIsIlJPTEUiOiJBRE1JTiIsImlhdCI6MTYwMDgxOTMxOH0.lS481Xro9oZ24mK2KtpEorNpydcBAqK1WXi7uCdmCRc"
+    }
+
+>> Borrar un pedido
+    [POST] /order/delete
+    {
+        ID: <numero>,
         "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MTQsIlVTRVJfTkFNRSI6IlVTRVJURVNUVFQiLCJFTUFJTCI6IlVTRVJURVNUQFVTRVJURVNULlVTRVJVU0VSVEVTVFRUVEVTVCIsIlJPTEUiOiJBRE1JTiIsImlhdCI6MTYwMDgxOTMxOH0.lS481Xro9oZ24mK2KtpEorNpydcBAqK1WXi7uCdmCRc"
     }
 
